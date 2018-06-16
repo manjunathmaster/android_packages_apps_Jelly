@@ -63,6 +63,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.CookieManager;
 import android.webkit.URLUtil;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -117,6 +118,7 @@ public class MainActivity extends WebViewExtActivity implements
         }
     };
 
+    private ValueCallback<Uri[]> mPathCallback;
     private CoordinatorLayout mCoordinator;
     private WebViewExt mWebView;
     private ProgressBar mLoadingProgress;
@@ -637,8 +639,8 @@ public class MainActivity extends WebViewExtActivity implements
         mCustomView.setBackgroundColor(ContextCompat.getColor(this, android.R.color.black));
         addContentView(mCustomView, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        findViewById(R.id.app_bar_layout).setVisibility(View.GONE);
-        findViewById(R.id.web_view_container).setVisibility(View.GONE);
+        //findViewById(R.id.app_bar_layout).setVisibility(View.GONE);
+        //findViewById(R.id.web_view_container).setVisibility(View.GONE);
     }
 
     @Override
@@ -648,13 +650,15 @@ public class MainActivity extends WebViewExtActivity implements
         }
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setImmersiveMode(false);
-        findViewById(R.id.app_bar_layout).setVisibility(View.VISIBLE);
-        findViewById(R.id.web_view_container).setVisibility(View.VISIBLE);
+        //findViewById(R.id.app_bar_layout).setVisibility(View.VISIBLE);
+        //findViewById(R.id.web_view_container).setVisibility(View.VISIBLE);
         ViewGroup viewGroup = (ViewGroup) mCustomView.getParent();
         viewGroup.removeView(mCustomView);
         mFullScreenCallback.onCustomViewHidden();
         mFullScreenCallback = null;
         mCustomView = null;
+
+        findViewById(R.id.app_bar_layout).requestFocus();
     }
 
     private void addShortcut() {
@@ -697,6 +701,18 @@ public class MainActivity extends WebViewExtActivity implements
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         setImmersiveMode(hasFocus && mCustomView != null);
+    }
+
+    public void setPathCallback(ValueCallback<Uri[]> path) {
+        mPathCallback = path;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == WebViewExtActivity.REQUEST_SELECT_FILE && mPathCallback != null) {
+            mPathCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
+            mPathCallback = null;
+        }
     }
 
     private static class SetAsFavoriteTask extends AsyncTask<Void, Void, Boolean> {

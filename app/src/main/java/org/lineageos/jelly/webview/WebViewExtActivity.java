@@ -16,11 +16,15 @@
 package org.lineageos.jelly.webview;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 
 public abstract class WebViewExtActivity extends AppCompatActivity {
+
+    public static final int REQUEST_SELECT_FILE = 100;
 
     public abstract void downloadFileAsk(String url, String contentDisposition, String mimeType);
 
@@ -37,4 +41,6 @@ public abstract class WebViewExtActivity extends AppCompatActivity {
     public abstract void onShowCustomView(View view, WebChromeClient.CustomViewCallback callback);
 
     public abstract void onHideCustomView();
+
+    public abstract void setPathCallback(ValueCallback<Uri[]> path);
 }
